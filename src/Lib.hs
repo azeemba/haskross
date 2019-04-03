@@ -22,16 +22,18 @@ type Words = [String]
 
 data WhichClue = First | Second deriving (Enum)
 
+-- Todo: 
+-- * Create some structure where we have a list of nodes
+--   but we also know mapping from clues
+-- * Figure out how we go from stable state to unique state
+
 -- The two nodes are part of the same clue. So we can filter out words
 -- that are not in both
-merge_clues :: (WhichClue, Node) -> (WhichClue, Node) -> (Node, Node)
-merge_clues clue_pair1 clue_pair2 =
-  let words1 = extract_clue clue_pair1
-      words2 = extract_clue clue_pair2
-      merged = words1 `intersect` words2
-      node1  = inject_clue clue_pair1 merged
-      node2  = inject_clue clue_pair2 merged
-  in  (node1, node2)
+merge_clues :: WhichClue -> [Node] -> [Node]
+merge_clues which_clue nodes =
+  let words_lists = map (\node -> extract_clue (which_clue, node)) nodes
+      merged = if null words_lists then [] else foldr1 intersect words_lists
+  in  map (\node -> inject_clue (which_clue, node) merged) nodes
 
 
 extract_clue :: (WhichClue, Node) -> Words
