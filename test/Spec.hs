@@ -41,3 +41,15 @@ main = hspec $ do
     it "should remove characters with no match" $ do
       compress_node (Node 0 ["a", "b"] 0 ["a", "b"] ['a', 'b', 'd'])
         `shouldBe` Node 0 ["a", "b"] 0 ["a", "b"] ['a', 'b']
+
+  describe "merge nodes in clues" $ do
+    it "should remove words that aren't in both nodes" $ do
+      let node = Node 0 ["both", "single"] 0 ["one", "both"] ['a', 'b']
+      let result1 = Node 0 ["both"] 0 ["one", "both"] ['a', 'b']
+      let result2 = Node 0 ["both", "single"] 0 ["both"] ['a', 'b']
+      merge_clues (First, node) (Second, node) `shouldBe` (result1, result2)
+    it "should leave valid clues unchanged" $ do
+      let words = ["a", "b", "c"]
+      let chars = ['a', 'b']
+      let node = Node 0 words 0 words chars
+      merge_clues (First, node) (Second, node) `shouldBe` (node, node)
