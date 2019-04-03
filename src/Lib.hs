@@ -29,18 +29,20 @@ merge_clues clue_pair1 clue_pair2 =
   let words1 = extract_clue clue_pair1
       words2 = extract_clue clue_pair2
       merged = words1 `intersect` words2
-      node1 = inject_clue clue_pair1 merged
-      node2 = inject_clue clue_pair2 merged
-  in (node1, node2)
+      node1  = inject_clue clue_pair1 merged
+      node2  = inject_clue clue_pair2 merged
+  in  (node1, node2)
 
 
 extract_clue :: (WhichClue, Node) -> Words
-extract_clue (First, (Node _ words1 _ _ _)) =  words1
-extract_clue (Second, (Node _  _ _ words2 _)) =  words2
+extract_clue (First , (Node _ words1 _ _ _)) = words1
+extract_clue (Second, (Node _ _ _ words2 _)) = words2
 
 inject_clue :: (WhichClue, Node) -> Words -> Node
-inject_clue (First, (Node ind1  _ ind2 words2 chars)) words1 = Node ind1 words1 ind2 words2 chars
-inject_clue (Second, (Node ind1 words1 ind2 _ chars)) words2 = Node ind1 words1 ind2 words2 chars
+inject_clue (First, (Node ind1 _ ind2 words2 chars)) words1 =
+  Node ind1 words1 ind2 words2 chars
+inject_clue (Second, (Node ind1 words1 ind2 _ chars)) words2 =
+  Node ind1 words1 ind2 words2 chars
 
 
 find_stable :: Eq a => (a -> a) -> a -> a -> a
