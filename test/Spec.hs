@@ -1,4 +1,5 @@
 import Test.Hspec
+import qualified Data.Vector as Vector
 import Control.Exception (evaluate)
 import Lib
 
@@ -54,3 +55,23 @@ main = hspec $ do
       let chars = ['a', 'b']
       let node  = Node 0 words 0 words chars
       merge_clues First [node, node] `shouldBe` [node, node]
+
+  describe "square grid" $ do
+    it "should look right" $ do
+      let words = ["bat", "cat"]
+      let chars = ['a' .. 'z']
+      let nodes = Vector.fromList
+            [ Node 0 words 0 words chars
+            , Node 0 words 1 words chars
+            , Node 1 words 0 words chars
+            , Node 1 words 1 words chars
+            ]
+      let
+        clues =
+          [(First, [0, 1]), (First, [2, 3]), (Second, [0, 2]), (Second, [1, 3])]
+      make_square_grid 2 words `shouldBe` Grid nodes clues
+
+    it "should stabilize" $ do
+      let words = ["bat", "rat", "sat", "tar", "bar"]
+      let grid = make_square_grid 3 words 
+      find_stable_grid grid `shouldBe` Grid (Vector.fromList []) []
