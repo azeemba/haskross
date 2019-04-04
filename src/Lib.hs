@@ -3,6 +3,10 @@ module Lib
       Node(Node),
       Words,
       WhichClue(First, Second),
+      Grid(Grid),
+      make_square_grid,
+      find_stable_grid,
+      iterate_on_grid,
       merge_clues,
       fix_compress,
       compress_node,
@@ -12,6 +16,7 @@ module Lib
     ) where
 
 import Data.List
+import qualified Data.Vector as Vector
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
@@ -20,12 +25,49 @@ data Node = Node Int Words Int Words [Char] | NodeEmpty deriving (Show, Eq)
 
 type Words = [String]
 
-data WhichClue = First | Second deriving (Enum)
+data WhichClue = First | Second deriving (Enum, Eq, Show)
 
 -- Todo: 
--- * Create some structure where we have a list of nodes
---   but we also know mapping from clues
 -- * Figure out how we go from stable state to unique state
+
+type Clue = (WhichClue, [Int])
+data Grid = Grid (Vector.Vector Node) [Clue] deriving (Eq, Show)
+
+find_stable_grid :: Grid -> Grid
+find_stable_grid = find_stable iterate_on_grid (Grid (Vector.fromList []) [])
+
+iterate_on_grid :: Grid -> Grid
+iterate_on_grid (Grid nodes clues) =
+  let nodes' = Vector.map fix_compress nodes
+      nodes'' = foldr (\clue in_nodes -> find_and_merge_clue clue in_nodes) nodes' clues
+  in Grid nodes'' clues
+
+
+find_and_merge_clue :: Clue -> Vector.Vector Node -> Vector.Vector Node
+find_and_merge_clue (which, indices) nodes =
+  let specific_nodes = map (\ind -> Vector.unsafeIndex nodes ind) indices
+  in  Vector.unsafeUpdate nodes (Vector.fromList (zip indices specific_nodes))
+
+--   0  1  2  3
+-- 0 0  1  2  3
+-- 1 4  5  6  7
+-- 2 8  9  10 11
+-- 3 12 13 14 15
+ind2pos :: Int -> Int -> (Int, Int)
+ind2pos i n = quotRem i n
+
+make_square_grid :: Int -> Words -> Grid
+make_square_grid size words =
+  let nodes =
+        map (\i -> make_square_node i size words) (take (size * size) [0 ..])
+      clues =
+        map (\i -> (First, take size [size * i ..])) [0 .. size - 1]
+          ++ map (\i -> (Second, take size [i, i + size ..])) [0 .. size - 1]
+  in  Grid (Vector.fromList nodes) clues
+
+make_square_node :: Int -> Int -> Words -> Node
+make_square_node i size words =
+  let (x, y) = ind2pos i size in Node x words y words ['a' .. 'z']
 
 -- The two nodes are part of the same clue. So we can filter out words
 -- that are not in both
