@@ -1,6 +1,5 @@
 module Lib
-    ( someFunc,
-      Node(Node),
+    ( Node(Node),
       Words,
       WhichClue(First, Second),
       Grid(Grid),
@@ -17,9 +16,6 @@ module Lib
 
 import Data.List
 import qualified Data.Vector as Vector
-
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
 
 data Node = Node Int Words Int Words [Char] | NodeEmpty deriving (Show, Eq)
 
