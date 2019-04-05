@@ -38,15 +38,18 @@ find_stable_grid = find_stable iterate_on_grid (Grid (Vector.fromList []) [])
 
 iterate_on_grid :: Grid -> Grid
 iterate_on_grid (Grid nodes clues) =
-  let nodes' = Vector.map fix_compress nodes
-      nodes'' = foldr (\clue in_nodes -> find_and_merge_clue clue in_nodes) nodes' clues
-  in Grid nodes'' clues
+  let nodes'  = Vector.map fix_compress nodes
+      nodes'' = foldr (\clue in_nodes -> find_and_merge_clue clue in_nodes)
+                      nodes'
+                      clues
+  in  Grid nodes'' clues
 
 
 find_and_merge_clue :: Clue -> Vector.Vector Node -> Vector.Vector Node
 find_and_merge_clue (which, indices) nodes =
-  let specific_nodes = map (\ind -> Vector.unsafeIndex nodes ind) indices
-  in  Vector.unsafeUpdate nodes (Vector.fromList (zip indices specific_nodes))
+  let specific_nodes  = map (\ind -> Vector.unsafeIndex nodes ind) indices
+      specific_nodes' = merge_clues which specific_nodes
+  in  Vector.unsafeUpdate nodes (Vector.fromList (zip indices specific_nodes'))
 
 --   0  1  2  3
 -- 0 0  1  2  3

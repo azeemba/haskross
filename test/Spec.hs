@@ -55,6 +55,22 @@ main = hspec $ do
       let chars = ['a', 'b']
       let node  = Node 0 words 0 words chars
       merge_clues First [node, node] `shouldBe` [node, node]
+    it "should empty out words when any words is empty" $ do
+      let words1 = ["ab", "cd", "ef"]
+      let words2 = []
+      let chars  = ['a' .. 'z']
+      let node1  = Node 0 words1 0 words2 chars
+      let node2  = Node 1 words2 0 words2 chars
+      merge_clues First [node1, node2]
+        `shouldBe` [Node 0 [] 0 [] chars, Node 1 [] 0 [] chars]
+    it "should empty out when no match possible" $ do
+      let words1 = ["ab", "cd", "ef"]
+      let words2 = ["pq", "rs", "tv"]
+      let chars  = ['a' .. 'z']
+      let node1  = Node 0 words1 0 [] chars
+      let node2  = Node 1 words2 0 [] chars
+      merge_clues First [node1, node2]
+        `shouldBe` [Node 0 [] 0 [] chars, Node 1 [] 0 [] chars]
 
   describe "square grid" $ do
     it "should look right" $ do
@@ -72,6 +88,13 @@ main = hspec $ do
       make_square_grid 2 words `shouldBe` Grid nodes clues
 
     it "should stabilize" $ do
-      let words = ["bat", "rat", "sat", "tar", "bar"]
-      let grid = make_square_grid 3 words 
-      find_stable_grid grid `shouldBe` Grid (Vector.fromList []) []
+      let words            = ["ab", "cd", "ef"]
+      let grid             = make_square_grid 2 words
+      let Grid nodes clues = grid
+      let empty_nodes = Vector.fromList
+            [ Node 0 [] 0 [] []
+            , Node 0 [] 1 [] []
+            , Node 1 [] 0 [] []
+            , Node 1 [] 1 [] []
+            ]
+      find_stable_grid grid `shouldBe` Grid empty_nodes clues
