@@ -2,6 +2,7 @@ import Test.Hspec
 import qualified Data.Vector as Vector
 import Control.Exception (evaluate)
 import Lib
+import Data.List
 
 main :: IO ()
 main = hspec $ do
@@ -98,3 +99,12 @@ main = hspec $ do
             , Node 1 [] 1 [] []
             ]
       find_stable_grid grid `shouldBe` Grid empty_nodes clues
+
+    -- This is real slow but we still want to test this 
+    -- it "should handle larger lists" $ do
+    --   let chars = ['a'..'j']
+    --   let words = [[a, b, c, d] | a<-chars, b<-chars, c<-chars, d<-chars]
+    --   let Grid nodes clues = find_stable_grid (make_square_grid 4 words)
+    --   let Node _ res_words _ _ _ = Vector.head nodes
+    --   -- words has 10k words 
+    --   res_words `shouldBe` words
