@@ -27,7 +27,12 @@ data WhichClue = First | Second deriving (Enum, Eq, Show)
 -- * Figure out how we go from stable state to unique state
 
 type Clue = (WhichClue, [Int])
-data Grid = Grid (Vector.Vector Node) [Clue] deriving (Eq, Show)
+data Grid = Grid (Vector.Vector Node) [Clue] deriving (Eq)
+instance Show Grid where
+  show (Grid nodes clues) = 
+      Vector.foldr (\node output -> if (length output > 100) then output else output ++ show node) "" nodes
+
+
 
 find_stable_grid :: Grid -> Grid
 find_stable_grid = find_stable iterate_on_grid (Grid (Vector.fromList []) [])
