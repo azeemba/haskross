@@ -23,6 +23,7 @@ dependencies:
 - hspec
 - vector
 - containers
+- sbv
 
 library:
   source-dirs: src
