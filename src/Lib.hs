@@ -52,13 +52,22 @@ constrain_seq_by_word indices all_nodes word =
     unique_pos_counts = size - word_len + 1
     word_spots        = map (\nth -> take word_len $ drop nth indices)
                             (take unique_pos_counts [0 ..])
-    inner_constraints = bAny (\is -> constrain_seq_by_word_at_pos is all_nodes wrapped_word) word_spots
-    left_constraint = constrain_seq_by_word_at_pos (take (length word + 1) [0..]) all_nodes (word ++ "#")
-    right_constraint = constrain_seq_by_word_at_pos (reverse $ take (length word + 1) [size-1, size-2..]) all_nodes ("#" ++ word)
-  in bOr [left_constraint, inner_constraints, right_constraint]
+    inner_constraints = bAny
+      (\is -> constrain_seq_by_word_at_pos is all_nodes wrapped_word)
+      word_spots
+    left_constraint = constrain_seq_by_word_at_pos
+      (take (length word + 1) [0 ..])
+      all_nodes
+      (word ++ "#")
+    right_constraint = constrain_seq_by_word_at_pos
+      (reverse $ take (length word + 1) [size - 1, size - 2 ..])
+      all_nodes
+      ("#" ++ word)
+  in
+    bOr [left_constraint, inner_constraints, right_constraint]
 
 constrain_seq_by_word_at_pos :: [Int] -> Nodes -> String -> SBool
 constrain_seq_by_word_at_pos indices all_nodes word =
-  let nodes_list = map (\ind -> all_nodes Vector.! ind) indices
+  let nodes_list     = map (\ind -> all_nodes Vector.! ind) indices
       node_ind_pairs = zip nodes_list [0 ..]
   in  bAll (\(node, ind) -> literal (word !! ind) .== node) node_ind_pairs
