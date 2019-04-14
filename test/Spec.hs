@@ -78,6 +78,27 @@ main = hspec $ do
               $ filter (\word -> not $ "at#" `isInfixOf` word) result_strings
       unexpected_strings `shouldBe` []
 
+  describe "constrain_by_words" $ do
+    it "solve a 2x2 grid" $ do
+      let node_names = ["0", "1", "2", "3"]
+      result <- allSat $ do
+        xs <- sChars node_names
+        let nodes = Vector.fromList xs
+        let words = ["at", "to"] ++ ["zu", "pi", "mr", "ws"]
+        constrain $ constrain_by_words 2 nodes words
+      let result_strings = solution2strings result node_names
+      result_strings `shouldBe` ["atto"]
+    it "should handle a large test case" $ do
+      pendingWith "Doesn't scale past 16 nodes :("
+      let node_names = take 64 $ map show [0..]
+      result <- sat $ do
+        xs <- sChars node_names
+        let nodes = Vector.fromList xs
+        let chars = ['a'..'g']
+        let words =  permutations chars -- 8! = 40k
+        constrain $ constrain_by_words 8 nodes words
+      show result `shouldBe` ""
+
 
 -- Takes the solution of each node_name and puts them together in the same
 -- order. So ['a','b'] and ['c', 'd'] solutions become ["ac", "bd"]

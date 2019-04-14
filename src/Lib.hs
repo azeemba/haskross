@@ -4,6 +4,7 @@ module Lib
       Nodes,
       Grid(..),
       constrain_node_letters,
+      constrain_by_words,
       constrain_seq_by_words,
       constrain_seq_by_word,
       constrain_seq_by_word_at_pos
@@ -29,7 +30,19 @@ type ClueValue = SInt32
 constrain_node_letters :: NodeValue -> [Char] -> SBool
 constrain_node_letters node chars = bAny (\c -> literal c .== node) chars
 
--- constrain_by_words :: Int -> Nodes -> PossibleWords -> SBool
+constrain_by_words :: Int -> Nodes -> PossibleWords -> SBool
+constrain_by_words grid_size nodes words =
+  let
+    row_indices =
+      map (\nth -> take grid_size [grid_size * nth ..]) (take grid_size [0 ..])
+    col_indices = map (\nth -> take grid_size [nth, nth + grid_size ..])
+                      (take grid_size [0 ..])
+    row_constraints =
+      bAll (\ind -> constrain_seq_by_words ind nodes words) row_indices
+    col_constraints =
+      bAll (\ind -> constrain_seq_by_words ind nodes words) col_indices
+  in
+    row_constraints &&& col_constraints
 
 constrain_seq_by_words :: [Int] -> Nodes -> PossibleWords -> SBool
 constrain_seq_by_words indices all_nodes all_words =
@@ -55,16 +68,22 @@ constrain_seq_by_word indices all_nodes word =
     inner_constraints = bAny
       (\is -> constrain_seq_by_word_at_pos is all_nodes wrapped_word)
       word_spots
-    left_constraint = constrain_seq_by_word_at_pos
-      (take (length word + 1) [0 ..])
-      all_nodes
-      (word ++ "#")
-    right_constraint = constrain_seq_by_word_at_pos
-      (reverse $ take (length word + 1) [size - 1, size - 2 ..])
-      all_nodes
-      ("#" ++ word)
+    left_constraint = if (length indices > length word)
+      then constrain_seq_by_word_at_pos (take (length word + 1) indices)
+                                        all_nodes
+                                        (word ++ "#")
+      else literal False
+    right_constraint = if (length indices > length word)
+      then constrain_seq_by_word_at_pos
+        (reverse $ take (length word + 1) $ reverse indices)
+        all_nodes
+        ("#" ++ word)
+      else literal False
+    exact_constraint = if (length indices == length word)
+      then constrain_seq_by_word_at_pos indices all_nodes word
+      else literal False
   in
-    bOr [left_constraint, inner_constraints, right_constraint]
+    bOr [left_constraint, inner_constraints, right_constraint, exact_constraint]
 
 constrain_seq_by_word_at_pos :: [Int] -> Nodes -> String -> SBool
 constrain_seq_by_word_at_pos indices all_nodes word =
