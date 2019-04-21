@@ -12,6 +12,8 @@ Z3 can be downloaded from their [releases](https://github.com/Z3Prover/z3/releas
 ## Status
 
 `src/Lib.hs` has the initial constraints with `test/Spec.hs` exercising the
-constraints. For a clue based approach, these constraints are sufficient.
-Soon, we will switch to a "node-value"
-based approach which should be more flexible.
+constraints. The current implementation is very flexible as it tries to 
+generate the shape and the words of the crossword at the same time.
+This results in an excessive number of constraints which hurts performance.
+
+This implementation was reimplemented using the C++ api here: [hackross](https://github.com/azeemba/hackross/)
